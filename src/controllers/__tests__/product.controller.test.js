@@ -3,12 +3,13 @@ import '@babel/polyfill';
 import request from 'supertest';
 
 import app, { server } from '../..';
-import { Product, Department } from '../../database/models';
+import { Product, Department, Category, ProductCategory } from '../../database/models';
 import truncate from '../../test/helpers';
 
 describe('product controller', () => {
   let product;
   let department;
+  let category;
   beforeEach(async done => {
     await truncate();
     product = await Product.create({
@@ -20,6 +21,18 @@ describe('product controller', () => {
       name: 'Groceries',
       description: 'Daily groceries',
     });
+
+    category = await Category.create({
+      department_id: department.department_id,
+      name: 'category',
+      description: 'category description',
+    });
+
+    await ProductCategory.create({
+      product_id: product.product_id,
+      category_id: category.category_id,
+    });
+
     done();
   });
 
@@ -108,8 +121,44 @@ describe('product controller', () => {
         .set('Content-Type', 'application/json')
         .end((error, res) => {
           expect(res.body).toHaveProperty('rows');
-          expect(res.body).toMatchSnapshot();
+          expect(Object.keys(res.body.rows[0])).toMatchSnapshot();
           expect(res.status).toEqual(200);
+          done();
+        });
+    });
+  });
+
+  describe('getProductCategories', () => {
+    it('should get category of a particular product', done => {
+      request(app)
+        .get(`/categories/inProduct/${product.product_id}`)
+        .set('Content-Type', 'application/json')
+        .end((error, res) => {
+          expect(Object.keys(res.body)).toMatchSnapshot();
+          expect(res.status).toEqual(200);
+          done();
+        });
+    });
+
+    it('should return an error if the product with the id is not found', done => {
+      request(app)
+        .get(`/categories/inProduct/456744884`)
+        .set('Content-Type', 'application/json')
+        .end((error, res) => {
+          expect(Object.keys(res.body)).toMatchSnapshot();
+          expect(res.status).toEqual(404);
+          done();
+        });
+    });
+
+    it('should return an error message if id is not a number', done => {
+      request(app)
+        .get(`/categories/inProduct/nott`)
+        .set('Content-Type', 'application/json')
+        .end((error, res) => {
+          expect(Object.keys(res.body)).toMatchSnapshot();
+          expect(Object.keys(res.body.error)).toMatchSnapshot();
+          expect(res.status).toEqual(400);
           done();
         });
     });

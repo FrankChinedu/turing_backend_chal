@@ -23,6 +23,7 @@ import {
   AttributeValue,
   Attribute,
   Category,
+  ProductCategory,
   Sequelize,
 } from '../database/models';
 
@@ -185,9 +186,13 @@ class ProductController {
 
   /**
    * Get a single department
-   * @param {*} req
-   * @param {*} res
-   * @param {*} next
+   
+   * @static
+   * @param {object} req express request object
+   * @param {object} res express response object
+   * @param {object} next next middleware
+   * @returns {json} json object with status and Department list
+   * @memberof ProductController
    */
   static async getDepartment(req, res, next) {
     const { department_id } = req.params; // eslint-disable-line
@@ -209,9 +214,13 @@ class ProductController {
 
   /**
    * This method should get all categories
-   * @param {*} req
-   * @param {*} res
-   * @param {*} next
+   
+   * @static
+   * @param {object} req express request object
+   * @param {object} res express response object
+   * @param {object} next next middleware
+   * @returns {json} json object with status and Categories list
+   * @memberof ProductController
    */
   static async getAllCategories(req, res, next) {
     // Implement code to get all categories here
@@ -243,6 +252,44 @@ class ProductController {
     const { department_id } = req.params;  // eslint-disable-line
     // implement code to get categories in a department here
     return res.status(200).json({ message: 'this works' });
+  }
+
+  /**
+   * Get a single product category
+   
+   * @static
+   * @param {object} req express request object
+   * @param {object} res express response object
+   * @param {object} next next middleware
+   * @returns {json} json object with status and product category list
+   * @memberof ProductController
+   */
+  static async getProductCategories(req, res, next) {
+    const { product_id } = req.params;
+    const productCategory = await ProductCategory.findOne({
+      where: {
+        product_id,
+      },
+      include: [
+        {
+          model: Category,
+          as: 'category',
+          attributes: ['category_id', 'department_id', 'name'],
+        },
+      ],
+    });
+    if (!productCategory) {
+      return res.status(404).json({
+        error: {
+          status: 404,
+          code: `PRO_01`,
+          message: `product with product id ${product_id} not found`,
+        },
+      });
+    }
+    const result = productCategory.category;
+
+    return res.status(200).json(result);
   }
 }
 
