@@ -100,4 +100,18 @@ describe('product controller', () => {
         });
     });
   });
+
+  describe('getAllCategories', () => {
+    it('should get all categories', done => {
+      request(app)
+        .get('/categories')
+        .set('Content-Type', 'application/json')
+        .end((error, res) => {
+          expect(res.body).toHaveProperty('rows');
+          expect(res.body).toMatchSnapshot();
+          expect(res.status).toEqual(200);
+          done();
+        });
+    });
+  });
 });
