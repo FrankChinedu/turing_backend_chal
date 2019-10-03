@@ -1,7 +1,46 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`product controller getAllCategories should get all categories 1`] = `
-Object {
-  "rows": Array [],
-}
+Array [
+  "category_id",
+  "department_id",
+  "name",
+  "description",
+]
+`;
+
+exports[`product controller getProductCategories should get category of a particular product 1`] = `
+Array [
+  "category_id",
+  "department_id",
+  "name",
+]
+`;
+
+exports[`product controller getProductCategories should return an error if the product with the id is not found 1`] = `
+Array [
+  "error",
+]
+`;
+
+exports[`product controller getProductCategories should return an error message if id is not a number 1`] = `
+Array [
+  "error",
+]
+`;
+
+exports[`product controller getProductCategories should return an error message if id is not a number 2`] = `
+Array [
+  "status",
+  "code",
+  "message",
+]
+`;
+
+exports[`product controller getProductCategories should return an error message if id is not a number 3`] = `
+Array [
+  "status",
+  "code",
+  "message",
+]
 `;
