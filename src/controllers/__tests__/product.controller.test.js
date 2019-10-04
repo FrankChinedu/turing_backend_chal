@@ -163,4 +163,72 @@ describe('product controller', () => {
         });
     });
   });
+
+  describe('get Category', () => {
+    it('should get all categories', done => {
+      request(app)
+        .get(`/categories/${category.category_id}`)
+        .set('Content-Type', 'application/json')
+        .end((error, res) => {
+          expect(res.body).toHaveProperty('category_id');
+          expect(res.body).toHaveProperty('department_id');
+          expect(res.body).toHaveProperty('name');
+          expect(res.body).toHaveProperty('description');
+          expect(Object.keys(res.body)).toMatchSnapshot();
+          expect(res.status).toEqual(200);
+          done();
+        });
+    });
+
+    it('should return not found if id category does not exist', done => {
+      request(app)
+        .get(`/categories/234567`)
+        .set('Content-Type', 'application/json')
+        .end((error, res) => {
+          expect(res.body).toHaveProperty('error');
+          expect(res.body.error).toHaveProperty('code');
+          expect(res.body.error).toHaveProperty('message');
+          expect(Object.keys(res.body)).toMatchSnapshot();
+          expect(Object.keys(res.body.error)).toMatchSnapshot();
+          expect(res.status).toEqual(404);
+          expect(res.body.error.status).toEqual(404);
+          done();
+        });
+    });
+  });
+
+  describe('getDepartmentCategories', () => {
+    it('should get all category in this department', done => {
+      request(app)
+        .get(`/categories/inDepartment/${department.department_id}`)
+        .set('Content-Type', 'application/json')
+        .end((error, res) => {
+          expect(res.body).toHaveProperty('rows');
+          expect(res.body.rows[0]).toHaveProperty('department_id');
+          expect(res.body.rows[0]).toHaveProperty('name');
+          expect(res.body.rows[0]).toHaveProperty('description');
+          expect(res.body.rows[0]).toHaveProperty('category_id');
+          expect(res.body.rows[0].department_id).toEqual(department.department_id);
+          expect(Object.keys(res.body.rows[0])).toMatchSnapshot();
+          expect(res.status).toEqual(200);
+          done();
+        });
+    });
+
+    it('should return not found if department Id does not exist', done => {
+      request(app)
+        .get(`/categories/inDepartment/2345678`)
+        .set('Content-Type', 'application/json')
+        .end((error, res) => {
+          expect(res.body).toHaveProperty('error');
+          expect(res.body.error).toHaveProperty('code');
+          expect(res.body.error).toHaveProperty('message');
+          expect(Object.keys(res.body)).toMatchSnapshot();
+          expect(Object.keys(res.body.error)).toMatchSnapshot();
+          expect(res.status).toEqual(404);
+          expect(res.body.error.status).toEqual(404);
+          done();
+        });
+    });
+  });
 });
