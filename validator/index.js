@@ -14,8 +14,8 @@ export const paramIsInterger = (req, res, next) => {
     return res.status(400).json({
       error: {
         status: 400,
-        code: `PAR_01`,
-        message: `id is not a number`,
+        code: `PARAM_01`,
+        message: `param is not a number`,
       },
     });
   }

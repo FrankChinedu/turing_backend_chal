@@ -251,7 +251,31 @@ class ProductController {
   static async getDepartmentCategories(req, res, next) {
     const { department_id } = req.params;  // eslint-disable-line
     // implement code to get categories in a department here
-    return res.status(200).json({ message: 'this works' });
+
+    const department = await Department.findOne({
+      where: {
+        department_id,
+      },
+    });
+
+    if (!department) {
+      return res.status(404).json({
+        error: {
+          status: 404,
+          code: `DEP_02`,
+          message: `Don't exist department with this ID`,
+          field: 'department_id',
+        },
+      });
+    }
+
+    const categories = await Category.findAll({
+      where: {
+        department_id,
+      },
+    });
+
+    return res.status(200).json({ rows: categories });
   }
 
   /**
@@ -290,6 +314,37 @@ class ProductController {
     const result = productCategory.category;
 
     return res.status(200).json(result);
+  }
+/**
+ * Get a single category
+ 
+ * @static
+ * @param {object} req express request object
+ * @param {object} res express response object
+ * @param {object} next next middleware
+ * @returns {json} json object with status and category content
+ * @memberof ProductController
+ */
+
+  static async getCategory(req, res, next) {
+    const { category_id } = req.params;
+    const category = await Category.findOne({
+      where: {
+        category_id,
+      },
+    });
+
+    if (!category) {
+      return res.status(404).json({
+        error: {
+          status: 404,
+          code: `CAT_01`,
+          message: `Don't exist category with this ID.`,
+          field: `category_id`,
+        },
+      });
+    }
+    return res.status(200).json(category);
   }
 }
 
