@@ -25,6 +25,7 @@ import {
   Category,
   ProductCategory,
   Sequelize,
+  sequelize,
 } from '../database/models';
 
 const { Op } = Sequelize;
@@ -47,16 +48,37 @@ class ProductController {
    */
   static async getAllProducts(req, res, next) {
     const { query } = req;
-    const { page, limit, offset } = query
+
+    const page = query.page && parseInt(query.page, 0) !== 0 ? Math.abs(query.page) - 1 : 0;
+    const limit = query.limit ? parseInt(query.limit, 0) : 20;
+
+    const offset = page * limit;
+    const desc_length = query.description_length ? query.description_length : 200;
+
     const sqlQueryMap = {
       limit,
       offset,
+      attributes: {
+        include: [
+          [sequelize.fn('SUBSTRING', sequelize.col('description'), 1, desc_length), 'description'],
+        ],
+      },
     };
     try {
       const products = await Product.findAndCountAll(sqlQueryMap);
+      const { count } = products;
+      const currentPage = page;
+      const currentPageSize = limit;
+      const totalPages = Math.ceil(count / limit);
+
       return res.status(200).json({
-        status: true,
-        products,
+        pagination: {
+          currentPage,
+          currentPageSize,
+          totalPages,
+          totalRecords: count,
+        },
+        rows: products.rows,
       });
     } catch (error) {
       return next(error);
@@ -74,10 +96,32 @@ class ProductController {
    * @memberof ProductController
    */
   static async searchProduct(req, res, next) {
-    const { query_string, all_words } = req.query;  // eslint-disable-line
+    const { query_string, all_words } = req.query;
+    const { query } = req; // eslint-disable-line
     // all_words should either be on or off
     // implement code to search product
-    return res.status(200).json({ message: 'this works' });
+    const page = query.page && parseInt(query.page, 0) !== 0 ? Math.abs(query.page) - 1 : 0;
+    const limit = query.limit ? parseInt(query.limit, 0) : 20;
+
+    const offset = page * limit;
+    const products = await Product.findAll({
+      limit,
+      offset,
+      where: {
+        [Op.or]: [{
+            name: {
+              [Op.like]: `%${query_string}%`
+            }
+          },
+          {
+            description: {
+              [Op.like]: `%${query_string}%`
+            },
+          },
+        ],
+      },
+    });
+    return res.status(200).json({ rows: products });
   }
 
   /**
@@ -138,8 +182,7 @@ class ProductController {
    * @memberof ProductController
    */
   static async getProduct(req, res, next) {
-
-    const { product_id } = req.params;  // eslint-disable-line
+    const { product_id } = req.params; // eslint-disable-line
     try {
       const product = await Product.findByPk(product_id, {
         include: [
@@ -159,7 +202,16 @@ class ProductController {
           },
         ],
       });
-      return res.status(500).json({ message: 'This works!!1' });
+
+      if (!product) {
+        return res.status(404).json({
+          error: {
+            status: 404,
+            message: `Product with id does not exist`, // eslint-disable-line
+          },
+        });
+      }
+      return res.status(200).json(product);
     } catch (error) {
       return next(error);
     }

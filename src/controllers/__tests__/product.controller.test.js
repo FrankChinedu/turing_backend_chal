@@ -11,7 +11,7 @@ describe('product controller', () => {
   let department;
   let category;
   beforeEach(async done => {
-    await truncate();
+    // await truncate();
     product = await Product.create({
       name: 'New T shirt',
       description: 'Simple T shirt',
@@ -48,8 +48,8 @@ describe('product controller', () => {
         .set('Content-Type', 'application/json')
         .end((error, res) => {
           expect(res.status).toEqual(200);
-          expect(typeof res.body).toHaveProperty('rows');
-          expect(typeof res.body).toHaveProperty('pagination');
+          expect(res.body).toHaveProperty('rows');
+          expect(res.body).toHaveProperty('pagination');
           done();
         });
     });
