@@ -9,23 +9,6 @@ Array [
 ]
 `;
 
-exports[`product controller get Category should get all categories 2`] = `
-Array [
-  "status",
-  "code",
-  "message",
-]
-`;
-
-exports[`product controller get Category should get all categories 3`] = `
-Array [
-  "category_id",
-  "department_id",
-  "name",
-  "description",
-]
-`;
-
 exports[`product controller get Category should return not found if id category does not exist 1`] = `
 Array [
   "error",
@@ -95,14 +78,6 @@ Array [
 `;
 
 exports[`product controller getProductCategories should return an error message if id is not a number 2`] = `
-Array [
-  "status",
-  "code",
-  "message",
-]
-`;
-
-exports[`product controller getProductCategories should return an error message if id is not a number 3`] = `
 Array [
   "status",
   "code",
